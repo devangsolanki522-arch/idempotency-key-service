@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Idempotency Key Demo</title>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 50px auto;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            margin-top: 8px;
+            margin-bottom: 15px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        #result {
+            padding: 15px;
+            background: #f2f2f2;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Idempotency Key Demo</h1>
+
+<label>Idempotency Key</label>
+<input
+        type="text"
+        id="idemKey"
+        value="order-123"
+>
+
+<label>Request Body</label>
+<textarea
+        id="requestBody"
+        rows="5"
+>{"amount":500}</textarea>
+
+<button id="sendButton">
+    Send Request
+</button>
+
+<h3>Response</h3>
+
+<div id="result">
+    No request yet.
+</div>
+
+<script>
+
+    $("#sendButton").click(function () {
+
+        const idemKey = $("#idemKey").val();
+        const requestBody = $("#requestBody").val();
+
+        $.ajax({
+            url: "http://localhost:8080/api/process",
+            method: "POST",
+            contentType: "application/json",
+            headers: {
+                "Idempotency-Key": idemKey
+            },
+            data: requestBody,
+
+            success: function (data, textStatus, xhr) {
+
+                $("#result").text(
+                    "Status: " + xhr.status + "\n\n" +
+                    "Response:\n" +
+                    JSON.stringify(data, null, 2)
+                );
+            },
+
+            error: function (xhr) {
+
+                $("#result").text(
+                    "Status: " + xhr.status + "\n\n" +
+                    "Response:\n" +
+                    xhr.responseText
+                );
+            }
+        });
+
+    });
+
+</script>
+
+</body>
+</html>
